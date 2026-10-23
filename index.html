@@ -1,0 +1,331 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Bahasa Indonesia - Ma'am Dela</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #d8f3ff, #fce1ff);
+  margin: 0;
+  padding: 15px;
+  color: #263238;
+}
+
+.container {
+  max-width: 700px;
+  margin: 15px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 22px;
+  box-shadow: 0 5px 18px #0002;
+  text-align: center;
+}
+
+h1 { color: #7138a5; margin-bottom: 5px; }
+.school { color: #087e8b; font-weight: bold; }
+.subtitle { color: #555; }
+
+.info {
+  background: #f4e8ff;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 18px 0;
+  text-align: left;
+  line-height: 1.6;
+}
+
+#progress {
+  color: #7138a5;
+  font-weight: bold;
+}
+
+#question {
+  font-size: 21px;
+  font-weight: bold;
+  margin: 20px 0;
+  min-height: 65px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0;
+  border: 2px solid #d7c3ef;
+  border-radius: 12px;
+  background: #faf6ff;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ead8ff;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.correct {
+  background: #c8f7d2 !important;
+  border-color: #159447 !important;
+}
+
+.wrong {
+  background: #ffd1d1 !important;
+  border-color: #df3333 !important;
+}
+
+#feedback {
+  font-size: 17px;
+  font-weight: bold;
+  margin: 15px 0;
+  min-height: 45px;
+}
+
+.main-btn {
+  background: #7138a5;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+
+#result { display: none; }
+
+.lamps {
+  font-size: 28px;
+  margin: 10px;
+}
+
+footer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>📚 Ayo Belajar!</h1>
+<div class="school">SD N 71 MALTENG</div>
+<h2>Game Kata Depan di dan Awalan di-</h2>
+<p class="subtitle">Bahasa Indonesia • 10 Soal</p>
+
+<div class="info">
+  <b>💡 Ingat, ya!</b><br>
+  🏠 Kata depan <b>di</b> ditulis terpisah jika menunjukkan tempat.<br>
+  Contoh: di rumah, di sekolah.<br><br>
+  ✏️ Awalan <b>di-</b> ditulis serangkai dengan kata kerja.<br>
+  Contoh: ditulis, dibaca, disapu.
+</div>
+
+<div id="game">
+  <div class="lamps">
+    <span id="greenLamp">⚪</span>
+    <span id="redLamp">⚪</span>
+  </div>
+
+  <p id="progress">Soal 1 dari 10</p>
+  <div id="question">Memuat soal...</div>
+  <div id="answers"></div>
+  <div id="feedback" aria-live="polite"></div>
+  <button id="nextBtn" class="main-btn" onclick="nextQuestion()" hidden>
+    Soal Berikutnya ➜
+  </button>
+</div>
+
+<div id="result">
+  <h2>🎉 Permainan Selesai!</h2>
+  <p id="scoreText"></p>
+  <p id="message"></p>
+  <button class="main-btn" onclick="restartGame()">🔄 Main Lagi</button>
+</div>
+
+<footer>
+  💜 Dari Ma’am Dela untuk anak-anak hebat!
+</footer>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "1. Ibu memasak ... dapur. Kata yang tepat adalah ...",
+    a: ["didapur", "di dapur", "di-dapur", "dapur di"],
+    c: 1,
+    why: "'Di dapur' menunjukkan tempat, jadi ditulis terpisah."
+  },
+  {
+    q: "2. Buku itu ... oleh Rina. Kata yang tepat adalah ...",
+    a: ["di baca", "di-baca", "dibaca", "baca di"],
+    c: 2,
+    why: "'Dibaca' menggunakan awalan di-, jadi ditulis serangkai."
+  },
+  {
+    q: "3. Ayah bekerja ... kantor.",
+    a: ["dikantor", "di-kantor", "kantor di", "di kantor"],
+    c: 3,
+    why: "'Di kantor' menunjukkan tempat, jadi ditulis terpisah."
+  },
+  {
+    q: "4. Lantai kelas ... oleh siswa.",
+    a: ["disapu", "di sapu", "di-sapu", "sapu di"],
+    c: 0,
+    why: "'Disapu' adalah kata kerja berawalan di-, jadi ditulis serangkai."
+  },
+  {
+    q: "5. Manakah penulisan yang benar?",
+    a: ["dirumah", "di-rumah", "di rumah", "rumah-di"],
+    c: 2,
+    why: "'Di rumah' menunjukkan tempat, jadi ditulis terpisah."
+  },
+  {
+    q: "6. Surat itu ... oleh kakak.",
+    a: ["di tulis", "ditulis", "di-tulis", "tulis di"],
+    c: 1,
+    why: "'Ditulis' menggunakan awalan di-, jadi ditulis serangkai."
+  },
+  {
+    q: "7. Kucing tidur ... bawah meja.",
+    a: ["dibawah", "di-bawah", "bawah di", "di bawah"],
+    c: 3,
+    why: "'Di bawah' menunjukkan tempat, jadi ditulis terpisah."
+  },
+  {
+    q: "8. Baju seragam ... oleh Ibu.",
+    a: ["dicuci", "di cuci", "di-cuci", "cuci di"],
+    c: 0,
+    why: "'Dicuci' menggunakan awalan di-, jadi ditulis serangkai."
+  },
+  {
+    q: "9. Kalimat dengan penulisan yang benar adalah ...",
+    a: [
+      "Adik bermain dirumah.",
+      "Adik bermain di-rumah.",
+      "Adik bermain di rumah.",
+      "Adik bermain rumah di."
+    ],
+    c: 2,
+    why: "'Di rumah' menunjukkan tempat dan harus ditulis terpisah."
+  },
+  {
+    q: "10. Manakah kalimat yang menggunakan awalan di- dengan benar?",
+    a: [
+      "Nasi di masak Ibu.",
+      "Nasi dimasak Ibu.",
+      "Nasi di-masak Ibu.",
+      "Nasi masak di Ibu."
+    ],
+    c: 1,
+    why: "'Dimasak' adalah kata kerja berawalan di-, jadi ditulis serangkai."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "id-ID";
+  utterance.rate = 0.9;
+  window.speechSynthesis.speak(utterance);
+}
+
+function showQuestion() {
+  answered = false;
+  const item = questions[current];
+
+  document.getElementById("progress").textContent =
+    `Soal ${current + 1} dari ${questions.length}`;
+
+  document.getElementById("question").textContent = item.q;
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("greenLamp").textContent = "⚪";
+  document.getElementById("redLamp").textContent = "⚪";
+  document.getElementById("nextBtn").hidden = true;
+
+  const answers = document.getElementById("answers");
+  answers.innerHTML = "";
+
+  item.a.forEach((answer, index) => {
+    const button = document.createElement("button");
+    button.textContent = answer;
+    button.onclick = () => checkAnswer(index, button);
+    answers.appendChild(button);
+  });
+}
+
+function checkAnswer(index, selectedButton) {
+  if (answered) return;
+  answered = true;
+
+  const item = questions[current];
+  const buttons = document.querySelectorAll("#answers button");
+  buttons.forEach(button => button.disabled = true);
+
+  if (index === item.c) {
+    score += 10;
+    selectedButton.classList.add("correct");
+    document.getElementById("greenLamp").textContent = "🟢";
+    document.getElementById("feedback").textContent =
+      "🎉 Hebat! Jawabanmu benar! " + item.why;
+    speak("Hebat! Jawabanmu benar!");
+  } else {
+    selectedButton.classList.add("wrong");
+    buttons[item.c].classList.add("correct");
+    document.getElementById("redLamp").textContent = "🔴";
+    document.getElementById("feedback").textContent =
+      "😊 Belum tepat. Jawaban yang benar: " +
+      item.a[item.c] + ". " + item.why;
+    speak("Belum tepat. Jawaban yang benar adalah " + item.a[item.c]);
+  }
+
+  document.getElementById("nextBtn").hidden = false;
+  document.getElementById("nextBtn").textContent =
+    current === questions.length - 1 ? "Lihat Nilai 🏆" : "Soal Berikutnya ➜";
+}
+
+function nextQuestion() {
+  if (!answered) return;
+
+  current++;
+
+  if (current >= questions.length) {
+    document.getElementById("game").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    document.getElementById("scoreText").textContent =
+      `Nilaimu: ${score} dari 100`;
+    document.getElementById("message").textContent =
+      score === 100 ? "Luar biasa! Kamu hebat sekali! 🌟" :
+      score >= 70 ? "Bagus! Terus berlatih, ya! 💪" :
+      "Jangan menyerah! Ayo belajar lagi! ❤️";
+    speak("Permainan selesai. Nilaimu " + score);
+    return;
+  }
+
+  showQuestion();
+}
+
+function restartGame() {
+  current = 0;
+  score = 0;
+  document.getElementById("result").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  showQuestion();
+}
+
+showQuestion();
+</script>
+</body>
+</html>
+```
